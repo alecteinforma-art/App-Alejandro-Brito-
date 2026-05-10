@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Saldos — WhatsApp</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --green: #1a7a4a;
+    --green-light: #e8f5ee;
+    --green-mid: #2ea865;
+    --amber: #b45309;
+    --amber-light: #fef3c7;
+    --red: #b91c1c;
+    --red-light: #fee2e2;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --bg: #ffffff;
+    --surface: #f9fafb;
+    --whatsapp: #128C7E;
+    --whatsapp-light: #dcf8c6;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f2f5;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--whatsapp);
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-icon {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .header h1 { font-size: 17px; font-weight: 600; }
+  .header p { font-size: 12px; opacity: 0.85; }
+
+  /* Layout */
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+
+  /* Tabs */
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    background: white;
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+  }
+  .tab.active { background: var(--whatsapp); color: white; }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 14px; font-weight: 600;
+    color: var(--text);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 7px;
+  }
+
+  /* Form */
+  .fg { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .fg label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  input, select {
+    height: 42px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: white;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--whatsapp); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Buttons */
+  .btn {
+    height: 42px; padding: 0 16px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--whatsapp); color: white; width: 100%; justify-content: center; }
+  .btn-primary:hover { background: #0e7a6e; }
+  .btn-secondary { background: var(--gray-light); color: var(--text); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-sm { height: 30px; padding: 0 10px; font-size: 12px; }
+  .btn-copy { background: var(--green-light); color: var(--green); width: 100%; justify-content: center; margin-top: 10px; }
+  .btn-copy:hover { background: #c6e8d5; }
+  .btn-wa { background: #25D366; color: white; width: 100%; justify-content: center; margin-top: 8px; }
+  .btn-wa:hover { background: #1ebe5d; }
+  .btn-wa-num { background: #128C7E; color: white; width: 100%; justify-content: center; margin-top: 8px; }
+  .btn-wa-num:hover { background: #0e7a6e; }
+  .btn-row { display: flex; gap: 8px; }
+
+  /* Metrics */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .metric {
+    background: white; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 10px; text-align: center;
+  }
+  .metric-val { font-size: 20px; font-weight: 600; }
+  .metric-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Cliente list */
+  .cliente-item {
+    background: white; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .cli-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .cli-name { font-size: 15px; font-weight: 600; }
+  .cli-saldo { font-size: 16px; font-weight: 600; color: var(--green); }
+  .cli-detail { font-size: 12px; color: var(--text-muted); }
+  .progress-bg { background: var(--gray-light); border-radius: 4px; height: 5px; margin: 8px 0 6px; overflow: hidden; }
+  .progress-fill { height: 5px; border-radius: 4px; transition: width 0.4s; }
+  .cli-actions { display: flex; gap: 6px; }
+
+  /* Badge */
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+
+  /* WhatsApp preview */
+  .wa-preview {
+    background: #e5ddd5;
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    margin-top: 14px;
+    display: none;
+  }
+  .wa-preview.show { display: block; }
+  .wa-bubble {
+    background: white;
+    border-radius: 0 10px 10px 10px;
+    padding: 10px 12px;
+    max-width: 90%;
+    font-size: 13.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .wa-bubble-label {
+    font-size: 11px; color: #667781;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .wa-time { font-size: 11px; color: #667781; text-align: right; margin-top: 4px; }
+
+  /* Historial */
+  .hist-item {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-name { font-weight: 600; margin-bottom: 2px; }
+  .hist-desc { font-size: 11px; color: var(--text-muted); }
+  .hist-right { text-align: right; }
+  .hist-monto { font-weight: 600; color: var(--red); }
+  .hist-resta { font-size: 11px; color: var(--text-muted); }
+
+  /* Empty */
+  .empty { text-align: center; padding: 28px 16px; color: var(--text-muted); font-size: 13px; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; color: white;
+    padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; font-weight: 500;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    z-index: 999; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  /* Reset día */
+  .reset-banner {
+    background: var(--amber-light); border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 12px; color: var(--amber);
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">💬</div>
+  <div>
+    <h1>Control de Saldos</h1>
+    <p>Descuento automático para WhatsApp</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Reset diario banner -->
+  <div class="reset-banner" id="resetBanner" style="display:none">
+    <span>⚠️ Es un nuevo día. ¿Resetear saldos al inicial?</span>
+    <button class="btn btn-secondary btn-sm" onclick="resetearDia()">Resetear</button>
+  </div>
+
+  <!-- Métricas -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-val" id="mTotal">0</div>
+      <div class="metric-lbl">Clientes</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--green)" id="mSaldo">S/0</div>
+      <div class="metric-lbl">Disponible</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--amber)" id="mConsumo">S/0</div>
+      <div class="metric-lbl">Consumido hoy</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="goTab('t-clientes', this)">👥 Clientes</div>
+    <div class="tab" onclick="goTab('t-consumo', this)">📋 Vale</div>
+    <div class="tab" onclick="goTab('t-historial', this)">🕐 Historial</div>
+  </div>
+
+  <!-- === CLIENTES === -->
+  <div id="t-clientes" class="section active">
+    <div class="card">
+      <div class="card-title">➕ Nuevo cliente</div>
+      <div class="fg"><label>Nombre del cliente</label><input id="cNom" placeholder="Ej: Lauidal" autocomplete="off"></div>
+      <div class="row2">
+        <div class="fg"><label>Saldo inicial del día (S/)</label><input id="cSal" type="number" placeholder="5000" min="1"></div>
+        <div class="fg"><label>Unidad / Área</label><input id="cArea" placeholder="Mañana" autocomplete="off"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addCliente()">➕ Agregar cliente</button>
+    </div>
+
+    <div id="listaClientes">
+      <div class="empty"><div class="empty-icon">👥</div>No hay clientes aún.<br>Agrega tu primer cliente arriba.</div>
+    </div>
+  </div>
+
+  <!-- === CONSUMO / VALE === -->
+  <div id="t-consumo" class="section">
+    <div class="card">
+      <div class="card-title">📋 Registrar consumo de vale</div>
+      <div class="fg"><label>Selecciona cliente</label>
+        <select id="dCli">
+          <option value="">— Selecciona un cliente —</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Monto del vale (S/)</label><input id="dMon" type="number" placeholder="1000" min="1"></div>
+        <div class="fg"><label>Descripción</label><input id="dDesc" placeholder="Almuerzo" autocomplete="off"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" style="flex:1" onclick="registrarConsumo()">✅ Registrar descuento</button>
+        <button class="btn btn-secondary" onclick="limpiar()">🗑</button>
+      </div>
+
+      <!-- Preview WhatsApp -->
+      <div class="wa-preview" id="waPreview">
+        <div class="wa-bubble-label">📲 Mensaje listo para WhatsApp</div>
+        <div class="wa-bubble" id="waBubble"></div>
+        <div class="wa-time" id="waTime"></div>
+        <button class="btn btn-copy" onclick="copiarMensaje()">📋 Copiar mensaje</button>
+        <button class="btn btn-wa" onclick="enviarWhatsApp()">📲 Enviar por WhatsApp</button>
+        <button class="btn btn-wa-num" onclick="enviarWhatsAppNumero()">📞 Enviar a número específico</button>
+      </div>
+
+      <!-- Modal número -->
+      <div id="modalNum" style="display:none;margin-top:12px;background:#f0f2f5;border-radius:10px;padding:12px">
+        <div class="fg" style="margin-bottom:8px">
+          <label>Número de WhatsApp (con código de país)</label>
+          <input id="waNumero" type="tel" placeholder="Ej: 51987654321" autocomplete="off">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-wa" style="flex:1" onclick="confirmarNumero()">📲 Enviar</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('modalNum').style.display='none'">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === HISTORIAL === -->
+  <div id="t-historial" class="section">
+    <div class="card">
+      <div class="card-title">🕐 Movimientos de hoy</div>
+      <div id="listaHistorial">
+        <div class="empty"><div class="empty-icon">📋</div>Sin movimientos aún.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ Opciones</div>
+      <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px" onclick="exportarResumen()">📤 Exportar resumen del día</button>
+      <button class="btn btn-secondary" style="width:100%;justify-content:center;color:var(--red)" onclick="resetearDia()">🔄 Resetear saldos al inicial</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let clientes = JSON.parse(localStorage.getItem('saldos_clientes') || '[]');
+let historial = JSON.parse(localStorage.getItem('saldos_historial') || '[]');
+const hoy = new Date().toDateString();
+const ultimoDia = localStorage.getItem('saldos_dia');
+
+if (ultimoDia && ultimoDia !== hoy) {
+  document.getElementById('resetBanner').style.display = 'flex';
+}
+localStorage.setItem('saldos_dia', hoy);
+
+function guardar() {
+  localStorage.setItem('saldos_clientes', JSON.stringify(clientes));
+  localStorage.setItem('saldos_historial', JSON.stringify(historial));
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function goTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+function addCliente() {
+  const nom = document.getElementById('cNom').value.trim();
+  const sal = parseFloat(document.getElementById('cSal').value);
+  const area = document.getElementById('cArea').value.trim() || 'General';
+  if (!nom) { toast('⚠️ Ingresa el nombre'); return; }
+  if (!sal || sal <= 0) { toast('⚠️ Ingresa un saldo válido'); return; }
+  if (clientes.find(c => c.nom.toLowerCase() === nom.toLowerCase())) { toast('⚠️ Ya existe ese cliente'); return; }
+  clientes.push({ nom, area, saldoInicial: sal, saldoActual: sal, consumido: 0 });
+  guardar();
+  document.getElementById('cNom').value = '';
+  document.getElementById('cSal').value = '';
+  document.getElementById('cArea').value = '';
+  renderClientes();
+  renderSelect();
+  renderMetrics();
+  toast('✅ Cliente agregado');
+}
+
+function renderClientes() {
+  const el = document.getElementById('listaClientes');
+  if (!clientes.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>No hay clientes aún.<br>Agrega tu primer cliente arriba.</div>';
+    return;
+  }
+  el.innerHTML = clientes.map((c, i) => {
+    const pct = Math.round((c.saldoActual / c.saldoInicial) * 100);
+    const color = pct > 50 ? '#1a7a4a' : pct > 20 ? '#b45309' : '#b91c1c';
+    const badge = pct > 50
+      ? '<span class="badge badge-green">Disponible</span>'
+      : pct > 20 ? '<span class="badge badge-amber">Bajo</span>'
+      : '<span class="badge badge-red">Crítico</span>';
+    return `<div class="cliente-item">
+      <div class="cli-top">
+        <div>
+          <div class="cli-name">${c.nom}</div>
+          <div class="cli-detail">${c.area} · Inicial: S/ ${c.saldoInicial.toLocaleString()}</div>
+        </div>
+        <div class="cli-saldo">S/ ${c.saldoActual.toLocaleString()}</div>
+      </div>
+      <div class="progress-bg"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        ${badge}
+        <div class="cli-actions">
+          <button class="btn btn-secondary btn-sm" onclick="resetCliente(${i})">🔄</button>
+          <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c" onclick="eliminarCliente(${i})">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSelect() {
+  const s = document.getElementById('dCli');
+  s.innerHTML = '<option value="">— Selecciona un cliente —</option>';
+  clientes.forEach((c, i) => {
+    s.innerHTML += `<option value="${i}">${c.nom} — S/ ${c.saldoActual.toLocaleString()} disponible</option>`;
+  });
+}
+
+function renderMetrics() {
+  document.getElementById('mTotal').textContent = clientes.length;
+  const ts = clientes.reduce((a, c) => a + c.saldoActual, 0);
+  const tc = clientes.reduce((a, c) => a + c.consumido, 0);
+  document.getElementById('mSaldo').textContent = 'S/' + ts.toLocaleString();
+  document.getElementById('mConsumo').textContent = 'S/' + tc.toLocaleString();
+}
+
+function renderHistorial() {
+  const el = document.getElementById('listaHistorial');
+  if (!historial.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Sin movimientos aún.</div>';
+    return;
+  }
+  el.innerHTML = historial.slice().reverse().map(h => `
+    <div class="hist-item">
+      <div>
+        <div class="hist-name">${h.nom}</div>
+        <div class="hist-desc">${h.desc} · ${h.hora}</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-monto">− S/ ${h.monto.toLocaleString()}</div>
+        <div class="hist-resta">Resto: S/ ${h.resto.toLocaleString()}</div>
+      </div>
+    </div>`).join('');
+}
+
+function registrarConsumo() {
+  const idx = parseInt(document.getElementById('dCli').value);
+  const mon = parseFloat(document.getElementById('dMon').value);
+  const desc = document.getElementById('dDesc').value.trim() || 'Consumo';
+  if (isNaN(idx) || document.getElementById('dCli').value === '') { toast('⚠️ Selecciona un cliente'); return; }
+  if (!mon || mon <= 0) { toast('⚠️ Ingresa el monto del vale'); return; }
+  const c = clientes[idx];
+  if (mon > c.saldoActual) { toast(`⚠️ Saldo insuficiente (S/ ${c.saldoActual.toLocaleString()} disponible)`); return; }
+  c.saldoActual -= mon;
+  c.consumido += mon;
+  const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  historial.push({ nom: c.nom, monto: mon, resto: c.saldoActual, desc, hora });
+  guardar();
+
+  const pct = Math.round((c.saldoActual / c.saldoInicial) * 100);
+  let alerta = '';
+  if (c.saldoActual === 0) alerta = '\n\n⚠️ *SALDO AGOTADO* — No puede consumir más hoy.';
+  else if (pct <= 20) alerta = `\n\n⚠️ Saldo bajo. Solo quedan S/ ${c.saldoActual.toLocaleString()}.`;
+
+  const msg = `✅ *${c.nom}* — Vale registrado\n\n💳 Consumo: *S/ ${mon.toLocaleString()}* (${desc})\n💰 Saldo restante: *S/ ${c.saldoActual.toLocaleString()}*${alerta}\n\n_${hora} — Sistema de saldos_`;
+
+  document.getElementById('waBubble').textContent = msg;
+  document.getElementById('waTime').textContent = hora;
+  document.getElementById('waPreview').classList.add('show');
+
+  renderClientes();
+  renderSelect();
+  renderMetrics();
+  renderHistorial();
+  toast('✅ Descuento registrado');
+}
+
+function copiarMensaje() {
+  const txt = document.getElementById('waBubble').textContent;
+  navigator.clipboard.writeText(txt).then(() => toast('📋 ¡Mensaje copiado! Pégalo en WhatsApp'));
+}
+
+function enviarWhatsApp() {
+  const txt = document.getElementById('waBubble').textContent;
+  const encoded = encodeURIComponent(txt);
+  window.open('https://wa.me/?text=' + encoded, '_blank');
+}
+
+function enviarWhatsAppNumero() {
+  const modal = document.getElementById('modalNum');
+  modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+}
+
+function confirmarNumero() {
+  const num = document.getElementById('waNumero').value.trim().replace(/\D/g, '');
+  if (!num || num.length < 8) { toast('⚠️ Ingresa un número válido'); return; }
+  const txt = document.getElementById('waBubble').textContent;
+  const encoded = encodeURIComponent(txt);
+  window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
+  document.getElementById('modalNum').style.display = 'none';
+}
+
+function limpiar() {
+  document.getElementById('dCli').value = '';
+  document.getElementById('dMon').value = '';
+  document.getElementById('dDesc').value = '';
+  document.getElementById('waPreview').classList.remove('show');
+}
+
+function resetCliente(i) {
+  if (!confirm(`¿Resetear saldo de ${clientes[i].nom} a S/ ${clientes[i].saldoInicial.toLocaleString()}?`)) return;
+  clientes[i].consumido = 0;
+  clientes[i].saldoActual = clientes[i].saldoInicial;
+  guardar();
+  renderClientes();
+  renderSelect();
+  renderMetrics();
+  toast('🔄 Saldo reseteado');
+}
+
+function eliminarCliente(i) {
+  if (!confirm(`¿Eliminar a ${clientes[i].nom}?`)) return;
+  clientes.splice(i, 1);
+  guardar();
+  renderClientes();
+  renderSelect();
+  renderMetrics();
+  toast('🗑 Cliente eliminado');
+}
+
+function resetearDia() {
+  if (!confirm('¿Resetear todos los saldos al monto inicial del día?')) return;
+  clientes.forEach(c => { c.saldoActual = c.saldoInicial; c.consumido = 0; });
+  historial = [];
+  guardar();
+  document.getElementById('resetBanner').style.display = 'none';
+  renderClientes();
+  renderSelect();
+  renderMetrics();
+  renderHistorial();
+  toast('🔄 Saldos reseteados para el día');
+}
+
+function exportarResumen() {
+  let txt = `RESUMEN DE SALDOS — ${new Date().toLocaleDateString('es-PE')}\n`;
+  txt += '='.repeat(40) + '\n\n';
+  clientes.forEach(c => {
+    txt += `${c.nom} (${c.area})\n`;
+    txt += `  Inicial:   S/ ${c.saldoInicial.toLocaleString()}\n`;
+    txt += `  Consumido: S/ ${c.consumido.toLocaleString()}\n`;
+    txt += `  Restante:  S/ ${c.saldoActual.toLocaleString()}\n\n`;
+  });
+  txt += '\nMOVIMIENTOS:\n' + '-'.repeat(30) + '\n';
+  historial.slice().reverse().forEach(h => {
+    txt += `${h.hora} | ${h.nom} | −S/${h.monto} | Resta: S/${h.resto} | ${h.desc}\n`;
+  });
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `saldos-${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+  toast('📤 Resumen exportado');
+}
+
+// Init
+renderClientes();
+renderSelect();
+renderMetrics();
+renderHistorial();
+</script>
+</body>
+</html>
