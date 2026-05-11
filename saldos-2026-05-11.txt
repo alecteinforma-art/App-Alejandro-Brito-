@@ -1,0 +1,14 @@
+RESUMEN DE SALDOS — 10/5/2026
+========================================
+
+Lau Vidal (General)
+  Inicial:   S/ 500
+  Consumido: S/ 100
+  Restante:  S/ 400
+
+
+MOVIMIENTOS:
+------------------------------
+07:16 p. m. | Lau Vidal | −S/100 | Resta: S/400 | Consumo
+05:22 p. m. | Lau Vidal | −S/350 | Resta: S/4300 | BHG-788
+05:21 p. m. | Lau Vidal | −S/350 | Resta: S/4650 | Consumo
