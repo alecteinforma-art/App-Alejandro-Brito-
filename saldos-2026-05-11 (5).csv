@@ -1,0 +1,16 @@
+﻿CONTROL DE SALDOS — 11/5/2026
+
+Nombre,Placa,Área,Saldo Inicial,Saldo Actual,Consumido
+Lau Vidal,,Cliente Crédito,2859.82,2657.77,202.05
+Transportes J,,Cliente Adelanto,3600.26,3600.26,0
+CYMI MASA GALONERA,,Cliente Adelanto,414.49,414.49,0
+CYMI MASA UNIDAD BKC-739,,Cliente Adelanto,765.15,765.15,0
+Ministerio Público Premium,,Cliente Crédito,16265.62,16071.480000000001,194.14
+Ministerio Público Diesel,,Cliente Crédito,43007.57,43007.57,0
+INVERSIONES MOY,,Cliente Crédito,1469.08,1169,300.08
+
+MOVIMIENTOS
+Hora,Cliente,Placa,Tipo,Monto,Saldo,Descripción
+01:26 p. m.,Lau Vidal,C1F-824,Consumo,202.05,2657.77,KM -300577
+10:58 a. m.,INVERSIONES MOY,AWS-808,AVM-712,F7M-733 ,F7M-733,Consumo,300.08,1169,4 vales
+10:48 a. m.,Ministerio Público Premium,EGW-668,Consumo,194.14,16071.480000000001,Consumo
