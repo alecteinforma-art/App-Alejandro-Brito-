@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Registro de Vales</title>
+<style>
+:root{
+  --bg:#0a0e1a;--surface:#111827;--card:#1a2235;--border:#2a3a55;
+  --accent:#00e5a0;--warn:#ff6b35;--text:#e8f0ff;--muted:#6b7fa3;
+  --input-bg:#0d1525;--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* INSTRUCCIONES BANNER */
+#instrBanner{background:#1a0a00;border-bottom:3px solid var(--warn);padding:14px 16px;}
+#instrBanner h3{color:var(--warn);font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+#instrBanner p{font-size:12px;color:#e8d5b0;margin-bottom:8px;line-height:1.5;}
+#instrBanner ol{font-size:12px;color:#e8d5b0;padding-left:18px;line-height:1.8;}
+#instrBanner ol li b{color:var(--accent);}
+#instrBanner a{color:var(--accent);font-weight:700;word-break:break-all;}
+.close-banner{background:var(--warn);border:none;border-radius:8px;padding:8px 16px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;margin-top:12px;width:100%;}
+.show-instr{background:#1a0a00;border:1px solid var(--warn);border-radius:8px;padding:8px 14px;font-size:12px;color:var(--warn);font-weight:700;cursor:pointer;display:none;margin:0 16px 0;}
+
+.hdr{background:#0d1f3c;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr-title{font-size:16px;font-weight:800;color:var(--accent);}
+.hdr-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+
+#keyBanner{background:#1a1000;border-bottom:2px solid var(--warn);padding:10px 16px;display:flex;gap:8px;align-items:center;}
+#keyBanner input{flex:1;background:rgba(0,0,0,.4);border:1px solid #ff6b3566;border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;-webkit-appearance:none;}
+#keyBanner button{background:var(--warn);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;}
+#keyActive{display:none;background:#0a1f10;border-bottom:1px solid #00e5a033;padding:8px 16px;font-size:12px;color:var(--accent);align-items:center;gap:8px;}
+#keyActive span{margin-left:auto;color:var(--warn);cursor:pointer;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:p 2s infinite;}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:10px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:.2s;-webkit-user-select:none;user-select:none;}
+.tab .ico{font-size:18px;display:block;margin-bottom:2px;}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+.main{padding:14px;max-width:580px;margin:0 auto;}
+.panel{display:none;}.panel.on{display:block;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.ctitle{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.flabel{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;background:var(--input-bg);border:2px solid var(--border);border-radius:var(--r);
+  padding:20px 10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);
+  transition:.15s;position:relative;overflow:hidden;min-height:90px;
+  -webkit-user-select:none;user-select:none;
+}
+.flabel:active{border-color:var(--accent);background:#0d2020;}
+.flabel .ico2{font-size:28px;}
+.flabel input[type=file]{
+  position:absolute;inset:0;opacity:0;width:100%;height:100%;
+  cursor:pointer;font-size:0;-webkit-appearance:none;
+}
+
+#preview{width:100%;max-height:220px;object-fit:contain;border-radius:10px;display:none;margin-bottom:10px;border:1px solid var(--border);}
+#previewName{display:none;font-size:12px;color:var(--accent);padding:8px;background:var(--input-bg);border-radius:8px;margin-bottom:10px;word-break:break-all;}
+
+/* ALERTA si está en file:// */
+#fileAlert{display:none;background:#3a1500;border:2px solid var(--warn);border-radius:var(--r);padding:14px;margin-bottom:14px;font-size:13px;line-height:1.5;color:#ffd09a;}
+#fileAlert strong{color:var(--warn);display:block;margin-bottom:6px;font-size:14px;}
+
+.btn{width:100%;padding:13px;border-radius:var(--r);border:none;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;-webkit-appearance:none;transition:.15s;}
+.btn-p{background:var(--accent);color:#000;}
+.btn-p:active{opacity:.8;}
+.btn-s{background:#1e2d44;color:var(--text);}
+.btn-s:active{opacity:.8;}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-row{display:flex;gap:10px;margin-top:10px;}
+.btn-row .btn{flex:1;}
+
+.ld{display:none;align-items:center;justify-content:center;gap:10px;padding:18px;color:var(--accent);font-size:13px;}
+.sp{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.rbox{background:var(--input-bg);border:1px solid var(--accent);border-radius:var(--r);padding:13px;font-size:12px;font-family:monospace;color:var(--accent);white-space:pre-wrap;word-break:break-word;margin-top:10px;max-height:180px;overflow-y:auto;}
+
+.field{margin-bottom:13px;}
+.lbl{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+.inp{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--text);font-family:monospace;font-size:14px;font-weight:700;text-transform:uppercase;outline:none;-webkit-appearance:none;transition:.2s;}
+.inp:focus{border-color:var(--accent);}
+.inp::placeholder{text-transform:none;color:var(--muted);font-weight:400;}
+select.inp{text-transform:none;}
+
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.scard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;}
+.slbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.sval{font-size:19px;font-weight:800;color:var(--accent);}
+.sval.w{color:var(--warn);}
+
+.tw{overflow-x:auto;border-radius:var(--r);}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:360px;}
+th{background:#0d1525;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;padding:9px 11px;text-align:left;white-space:nowrap;}
+td{padding:9px 11px;border-bottom:1px solid #1a2235;font-family:monospace;}
+tr:last-child td{border-bottom:none;}
+.bg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.bg-g{background:#00e5a022;color:var(--accent);}
+.bg-b{background:#005eff22;color:#60a5fa;}
+.bg-r{background:#ff2d5522;color:#ff6b8a;}
+
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.mo.hide{display:none;}
+.mb{background:var(--card);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%;max-width:580px;max-height:88vh;overflow-y:auto;}
+.mh{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.mt{font-size:17px;font-weight:800;margin-bottom:14px;}
+
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--accent);color:#000;padding:11px 22px;border-radius:30px;font-weight:700;font-size:14px;z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:90vw;}
+#toast.on{transform:translateX(-50%) translateY(0);}
+#toast.err{background:#ff2d55;color:#fff;}
+
+.empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty .ei{font-size:44px;margin-bottom:10px;}
+.saldo-info{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-family:monospace;font-size:13px;margin-bottom:12px;display:none;}
+
+/* PASOS */
+.step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+.step-num{background:var(--warn);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-txt{font-size:12px;color:#e8d5b0;line-height:1.5;}
+.step-txt b{color:var(--accent);}
+.step-txt a{color:var(--accent);font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- ══ BANNER DE INSTRUCCIONES ══ -->
+<div id="instrBanner">
+  <h3>⚠️ Cómo usar la cámara en el celular</h3>
+  <p>El archivo <b>no funciona desde Descargas</b>. Para que la cámara y galería funcionen en Android e iPhone necesitas abrirlo desde un servidor web. Es gratis y toma 3 minutos:</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-txt">Entra a <a href="https://github.com" target="_blank">github.com</a> y crea una cuenta gratuita (o inicia sesión).</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-txt">Crea un repositorio nuevo → ponle cualquier nombre → marca <b>"Public"</b>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-txt">Sube este archivo <b>vales-app.html</b> y renómbralo a <b>index.html</b>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-txt">Ve a <b>Settings → Pages → Branch: main → Save</b>. GitHub te da una URL como:<br><b>https://tuusuario.github.io/tunombre/</b></div>
+  </div>
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-txt">Abre esa URL en Chrome o Safari de tu celular. ¡Listo! La cámara funcionará.</div>
+  </div>
+
+  <p style="margin-top:10px;font-size:11px;color:#a08060;">💡 También puedes usar <a href="https://netlify.com" target="_blank" style="color:var(--accent)">netlify.com</a> → arrastra el archivo → obtienes URL instantánea.</p>
+  <button class="close-banner" onclick="cerrarInstr()">✅ Ya lo entendí, continuar</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="hdr-title">⛽ REGISTRO DE VALES</div>
+    <div class="hdr-sub" id="fecha"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="show-instr" id="showInstrBtn" onclick="mostrarInstr()">❓</button>
+    <div style="font-size:11px;color:var(--muted);font-family:monospace" id="cnt">0 reg.</div>
+  </div>
+</div>
+
+<div id="keyBanner">
+  <input type="password" id="keyIn" placeholder="🔑 Gemini API Key" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <button onclick="saveKey()">OK</button>
+</div>
+<div id="keyActive">
+  <div class="dot"></div> Gemini activa · solo esta sesión
+  <span onclick="resetKey()">Cambiar</span>
+</div>
+
+<div class="tabs">
+  <div class="tab on" data-tab="scan" onclick="goTab(this)"><span class="ico">📷</span>FOTO</div>
+  <div class="tab" data-tab="manual" onclick="goTab(this)"><span class="ico">✏️</span>MANUAL</div>
+  <div class="tab" data-tab="lista" onclick="goTab(this)"><span class="ico">📋</span>LISTA</div>
+  <div class="tab" data-tab="saldos" onclick="goTab(this)"><span class="ico">💰</span>SALDOS</div>
+</div>
+
+<div class="main">
+
+<!-- SCAN -->
+<div class="panel on" id="panel-scan">
+  <div class="card">
+    <div class="ctitle">📷 Fotografiar el vale</div>
+
+    <!-- Alerta si está en file:// -->
+    <div id="fileAlert">
+      <strong>⚠️ Cámara no disponible en este modo</strong>
+      Estás abriendo el archivo desde Descargas. La cámara y galería solo funcionan cuando el archivo está en un servidor web (GitHub Pages, Netlify, etc.).<br><br>
+      Toca <b>❓</b> arriba para ver las instrucciones.
+    </div>
+
+    <img id="preview">
+    <div id="previewName"></div>
+
+    <div class="cam-grid">
+      <label class="flabel" id="lblCam">
+        <span class="ico2">📸</span>
+        <span>Tomar Foto</span>
+        <input type="file" accept="image/*" capture="environment" onchange="onFile(this)" id="inputCam">
+      </label>
+      <label class="flabel" id="lblGal">
+        <span class="ico2">🖼️</span>
+        <span>Galería / Archivo</span>
+        <input type="file" accept="image/*,image/heic,image/heif" onchange="onFile(this)" id="inputGal">
+      </label>
+    </div>
+
+    <button class="btn btn-p" id="scanBtn" onclick="doScan()" disabled>🔍 Leer Vale con IA</button>
+    <div class="ld" id="ld"><div class="sp"></div> Analizando con Gemini...</div>
+
+    <div id="scanOut" style="display:none">
+      <div class="rbox" id="rbox"></div>
+      <div class="btn-row">
+        <button class="btn btn-s" onclick="clearScan()">🗑 Limpiar</button>
+        <button class="btn btn-p" onclick="abrirModal()">💾 Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANUAL -->
+<div class="panel" id="panel-manual">
+  <div class="card">
+    <div class="ctitle">✏️ Registro manual</div>
+    <div class="field">
+      <label class="lbl">Cliente</label>
+      <select class="inp" id="mCli" onchange="showSaldo('mCli','mSaldoInfo','mSaldoVal')"></select>
+    </div>
+    <div class="saldo-info" id="mSaldoInfo">
+      <span style="color:var(--muted)">SALDO: </span><span id="mSaldoVal" style="color:var(--accent);font-weight:700"></span>
+    </div>
+    <div class="field">
+      <label class="lbl">Placa</label>
+      <input class="inp" id="mPlaca" placeholder="ABC-123" oninput="up(this)" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="field">
+      <label class="lbl">Nro. Vale / Desc.</label>
+      <input class="inp" id="mVale" placeholder="V001-346" oninput="up(this)" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="field">
+      <label class="lbl">Tipo</label>
+      <select class="inp" id="mTipo">
+        <option>CONSUMO</option><option>ADELANTO</option><option>CREDITO</option><option>DEVOLUCION</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="lbl">Monto (S/)</label>
+      <input class="inp" id="mMonto" type="number" inputmode="decimal" placeholder="0.00" step="0.01" min="0" style="text-transform:none">
+    </div>
+    <button class="btn btn-p" onclick="regManual()">💾 Registrar</button>
+  </div>
+</div>
+
+<!-- LISTA -->
+<div class="panel" id="panel-lista">
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input class="inp" id="buscar" placeholder="Buscar..." oninput="renderLista()" style="flex:1;text-transform:none;font-family:inherit;" autocorrect="off">
+    <button class="btn btn-s" onclick="borrarTodo()" style="flex:0;padding:11px 14px;font-size:13px;width:auto">🗑</button>
+  </div>
+  <div id="listaBox"><div class="empty"><div class="ei">📋</div>Sin registros</div></div>
+</div>
+
+<!-- SALDOS -->
+<div class="panel" id="panel-saldos">
+  <div class="sgrid" id="sgrid"></div>
+  <div class="card">
+    <div class="ctitle">💰 Clientes</div>
+    <div class="tw"><table><thead><tr><th>Cliente</th><th>Área</th><th>Saldo</th><th>Consumido</th></tr></thead>
+    <tbody id="sTable"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">📂 Importar CSV</div>
+    <label class="flabel" style="border-style:dashed;padding:16px;flex-direction:row;justify-content:center;gap:10px;min-height:60px">
+      <span style="font-size:20px">📂</span>
+      <span>Seleccionar archivo CSV</span>
+      <input type="file" accept=".csv,text/csv,text/plain" onchange="loadCSV(this)">
+    </label>
+    <div id="csvMsg" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:monospace"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="mo hide" id="modal">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mt">💾 Confirmar registro</div>
+    <div class="field">
+      <label class="lbl">Cliente</label>
+      <select class="inp" id="cCli" onchange="showSaldo('cCli','cSaldoInfo','cSaldoVal')"></select>
+    </div>
+    <div class="saldo-info" id="cSaldoInfo">
+      <span style="color:var(--muted)">SALDO: </span><span id="cSaldoVal" style="color:var(--accent);font-weight:700"></span>
+    </div>
+    <div class="field"><label class="lbl">Placa</label><input class="inp" id="cPlaca" oninput="up(this)" autocorrect="off" autocapitalize="characters" spellcheck="false"></div>
+    <div class="field"><label class="lbl">Nro. Vale / Desc.</label><input class="inp" id="cVale" oninput="up(this)" autocorrect="off" autocapitalize="characters" spellcheck="false"></div>
+    <div class="field"><label class="lbl">Tipo</label>
+      <select class="inp" id="cTipo"><option>CONSUMO</option><option>ADELANTO</option><option>CREDITO</option><option>DEVOLUCION</option></select>
+    </div>
+    <div class="field"><label class="lbl">Monto (S/)</label>
+      <input class="inp" id="cMonto" type="number" inputmode="decimal" step="0.01" min="0" style="text-transform:none">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-p" onclick="confirmar()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let KEY='',IMG_B64='',IMG_MIME='',extraido={},registros=[],saldos=[];
+
+window.onload=()=>{
+  document.getElementById('fecha').textContent=new Date().toLocaleDateString('es-PE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Detectar si está en file:// o content:// (descarga local)
+  const proto=location.protocol;
+  const esLocal=(proto==='file:'||proto==='content:');
+  if(esLocal){
+    document.getElementById('fileAlert').style.display='block';
+    // Deshabilitar los inputs de archivo para evitar confusión
+    ['inputCam','inputGal'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.disabled=true;}
+    });
+    ['lblCam','lblGal'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.style.opacity='0.4';el.style.cursor='not-allowed';}
+    });
+  }
+
+  try{
+    const k=sessionStorage.getItem('gk');if(k){KEY=k;showKeyOk();}
+    const r=sessionStorage.getItem('vr');if(r)registros=JSON.parse(r);
+    const s=sessionStorage.getItem('vs');if(s)saldos=JSON.parse(s);
+  }catch(e){}
+  if(!saldos.length)defaultSaldos();
+  fillSelects();renderLista();renderSaldos();updCnt();
+
+  // Mostrar instrucciones si es local (primera vez) o si ya las cerró antes
+  if(esLocal){
+    document.getElementById('instrBanner').style.display='block';
+  } else {
+    // Si está en servidor, ocultar banner y mostrar botón ❓
+    document.getElementById('instrBanner').style.display='none';
+    document.getElementById('showInstrBtn').style.display='block';
+  }
+};
+
+function cerrarInstr(){
+  document.getElementById('instrBanner').style.display='none';
+  document.getElementById('showInstrBtn').style.display='block';
+}
+function mostrarInstr(){
+  document.getElementById('instrBanner').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// KEY
+function saveKey(){
+  const v=document.getElementById('keyIn').value.trim();
+  if(!v){toast('⚠️ Ingresa la clave',1);return;}
+  KEY=v;try{sessionStorage.setItem('gk',v);}catch(e){}
+  document.getElementById('keyIn').value='';
+  showKeyOk();toast('🔑 Clave lista');
+}
+function showKeyOk(){
+  document.getElementById('keyBanner').style.display='none';
+  document.getElementById('keyActive').style.display='flex';
+}
+function resetKey(){
+  KEY='';try{sessionStorage.removeItem('gk');}catch(e){}
+  document.getElementById('keyBanner').style.display='flex';
+  document.getElementById('keyActive').style.display='none';
+}
+
+// TABS
+function goTab(el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  const id=el.dataset.tab;
+  document.getElementById('panel-'+id).classList.add('on');
+  if(id==='manual')fillSelects();
+  if(id==='lista')renderLista();
+  if(id==='saldos')renderSaldos();
+}
+
+// FILE
+function onFile(inp){
+  const f=inp.files[0];if(!f)return;
+  IMG_MIME=f.type||'image/jpeg';
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    IMG_B64=ev.target.result.split(',')[1];
+    const pv=document.getElementById('preview');
+    const pn=document.getElementById('previewName');
+    if(f.type.startsWith('image/')){
+      pv.src=ev.target.result;pv.style.display='block';pn.style.display='none';
+    }else{
+      pv.style.display='none';pn.textContent='📄 '+f.name;pn.style.display='block';
+    }
+    document.getElementById('scanBtn').disabled=false;
+    document.getElementById('scanOut').style.display='none';
+  };
+  rd.readAsDataURL(f);
+  inp.value='';
+}
+
+// SCAN
+async function doScan(){
+  if(!KEY){toast('⚠️ Ingresa la clave Gemini primero',1);return;}
+  if(!IMG_B64){toast('⚠️ Selecciona una imagen',1);return;}
+  document.getElementById('ld').style.display='flex';
+  document.getElementById('scanBtn').disabled=true;
+  document.getElementById('scanOut').style.display='none';
+  const prompt=`Analiza este vale de combustible. Responde SOLO con JSON válido sin texto extra:
+{"cliente":"EN MAYUSCULAS","placa":"MAYUSCULAS","nro_vale":"MAYUSCULAS","tipo":"CONSUMO","monto":0.00,"km":null,"descripcion":"MAYUSCULAS"}
+Usa null si el campo no aparece.`;
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:IMG_MIME,data:IMG_B64}}]}],generationConfig:{temperature:0.1,maxOutputTokens:512}})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'Error '+res.status);}
+    const d=await res.json();
+    const txt=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    try{extraido=JSON.parse(txt);}catch{extraido={descripcion:txt};}
+    const m={cliente:'CLIENTE',placa:'PLACA',nro_vale:'NRO. VALE',tipo:'TIPO',monto:'MONTO',km:'KM',descripcion:'DESC.'};
+    const lineas=[];
+    for(const[k,lb]of Object.entries(m)){
+      if(extraido[k]!=null&&extraido[k]!=='')
+        lineas.push(`${lb}: ${k==='monto'?'S/ '+Number(extraido[k]).toFixed(2):extraido[k]}`);
+    }
+    document.getElementById('rbox').textContent=lineas.join('\n')||txt;
+    document.getElementById('scanOut').style.display='block';
+  }catch(err){toast('❌ '+err.message,1);}
+  finally{document.getElementById('ld').style.display='none';document.getElementById('scanBtn').disabled=false;}
+}
+
+function clearScan(){
+  IMG_B64='';IMG_MIME='';extraido={};
+  document.getElementById('preview').style.display='none';
+  document.getElementById('previewName').style.display='none';
+  document.getElementById('scanBtn').disabled=true;
+  document.getElementById('scanOut').style.display='none';
+}
+
+// MODAL
+function abrirModal(){
+  fillSelects();
+  document.getElementById('cPlaca').value=(extraido.placa||'').toUpperCase();
+  document.getElementById('cVale').value=(extraido.nro_vale||extraido.descripcion||'').toUpperCase();
+  document.getElementById('cMonto').value=extraido.monto||'';
+  const sel=document.getElementById('cCli');
+  const nom=(extraido.cliente||'').toUpperCase();
+  sel.value='';
+  if(nom){for(const o of sel.options){if(o.text.toUpperCase().includes(nom.substring(0,5))){sel.value=o.value;break;}}}
+  showSaldo('cCli','cSaldoInfo','cSaldoVal');
+  document.getElementById('modal').classList.remove('hide');
+}
+function cerrarModal(){document.getElementById('modal').classList.add('hide');}
+
+function confirmar(){
+  const c=document.getElementById('cCli').value,p=document.getElementById('cPlaca').value.toUpperCase(),
+        v=document.getElementById('cVale').value.toUpperCase(),t=document.getElementById('cTipo').value,
+        m=parseFloat(document.getElementById('cMonto').value);
+  if(!c){toast('⚠️ Selecciona cliente',1);return;}
+  if(!p){toast('⚠️ Ingresa la placa',1);return;}
+  if(!m||m<=0){toast('⚠️ Monto inválido',1);return;}
+  addReg({cliente:c,placa:p,vale:v,tipo:t,monto:m});
+  cerrarModal();clearScan();goTabId('lista');
+}
+
+function regManual(){
+  const c=document.getElementById('mCli').value,p=document.getElementById('mPlaca').value.toUpperCase(),
+        v=document.getElementById('mVale').value.toUpperCase(),t=document.getElementById('mTipo').value,
+        m=parseFloat(document.getElementById('mMonto').value);
+  if(!c){toast('⚠️ Selecciona cliente',1);return;}
+  if(!p){toast('⚠️ Ingresa la placa',1);return;}
+  if(!m||m<=0){toast('⚠️ Monto inválido',1);return;}
+  addReg({cliente:c,placa:p,vale:v,tipo:t,monto:m});
+  ['mPlaca','mVale','mMonto'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mSaldoInfo').style.display='none';
+  goTabId('lista');
+}
+
+function addReg(r){
+  const now=new Date();
+  registros.unshift({id:Date.now(),hora:now.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
+    fecha:now.toLocaleDateString('es-PE'),cliente:r.cliente.toUpperCase(),placa:r.placa.toUpperCase(),
+    vale:(r.vale||'').toUpperCase(),tipo:r.tipo,monto:r.monto});
+  const si=saldos.findIndex(s=>s.nombre===r.cliente);
+  if(si>=0){saldos[si].consumido=Number(saldos[si].consumido)+r.monto;saldos[si].saldoActual=Math.max(0,Number(saldos[si].saldoActual)-r.monto);}
+  save();updCnt();toast('✅ S/ '+r.monto.toFixed(2)+' registrado');
+}
+
+function renderLista(){
+  const q=(document.getElementById('buscar')?.value||'').toUpperCase();
+  const list=q?registros.filter(r=>(r.cliente+r.placa+r.vale+r.tipo+r.monto).toUpperCase().includes(q)):registros;
+  const box=document.getElementById('listaBox');
+  if(!list.length){box.innerHTML='<div class="empty"><div class="ei">📋</div>'+(q?'Sin resultados':'Sin registros')+'</div>';return;}
+  let h='<div class="tw"><table><thead><tr><th>HORA</th><th>CLIENTE</th><th>PLACA</th><th>VALE</th><th>TIPO</th><th>S/</th><th></th></tr></thead><tbody>';
+  for(const r of list){
+    const bc=r.tipo==='CONSUMO'?'bg-g':r.tipo==='ADELANTO'?'bg-b':'bg-r';
+    h+=`<tr><td style="color:var(--muted)">${r.hora}</td><td style="font-size:11px">${r.cliente}</td><td>${r.placa}</td>
+    <td style="font-size:11px">${r.vale||'—'}</td><td><span class="bg ${bc}">${r.tipo}</span></td>
+    <td style="color:var(--accent);font-weight:700">${Number(r.monto).toFixed(2)}</td>
+    <td><span style="cursor:pointer;font-size:16px" onclick="delReg(${r.id})">🗑</span></td></tr>`;
+  }
+  h+='</tbody></table></div>';
+  box.innerHTML=h;
+}
+function delReg(id){
+  const i=registros.findIndex(r=>r.id===id);if(i<0)return;
+  const r=registros[i];
+  const si=saldos.findIndex(s=>s.nombre===r.cliente);
+  if(si>=0){saldos[si].consumido=Math.max(0,Number(saldos[si].consumido)-r.monto);saldos[si].saldoActual=Number(saldos[si].saldoActual)+r.monto;}
+  registros.splice(i,1);save();updCnt();renderLista();renderSaldos();toast('🗑 Eliminado');
+}
+function borrarTodo(){
+  if(!registros.length)return;
+  if(!confirm('¿Borrar todos los registros?'))return;
+  registros=[];save();updCnt();renderLista();toast('🗑 Borrado todo');
+}
+
+function renderSaldos(){
+  const tot=saldos.reduce((a,s)=>a+Number(s.saldoActual),0);
+  const con=saldos.reduce((a,s)=>a+Number(s.consumido),0);
+  document.getElementById('sgrid').innerHTML=`
+    <div class="scard"><div class="slbl">Saldo Total</div><div class="sval">S/${tot.toFixed(0)}</div></div>
+    <div class="scard"><div class="slbl">Consumido</div><div class="sval w">S/${con.toFixed(0)}</div></div>
+    <div class="scard"><div class="slbl">Clientes</div><div class="sval">${saldos.length}</div></div>
+    <div class="scard"><div class="slbl">Sin saldo</div><div class="sval w">${saldos.filter(s=>Number(s.saldoActual)<=0).length}</div></div>`;
+  const tb=document.getElementById('sTable');
+  if(!saldos.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Importa un CSV</td></tr>';return;}
+  tb.innerHTML=saldos.map(s=>{
+    const sal=Number(s.saldoActual);
+    const c=sal<=0?'var(--warn)':sal<500?'#facc15':'var(--accent)';
+    const bc=(s.area||'').includes('Crédito')?'bg-b':(s.area||'').includes('Adelanto')?'bg-g':'';
+    return`<tr><td style="font-size:11px;font-weight:700">${s.nombre}</td>
+    <td><span class="bg ${bc}" style="font-size:9px">${s.area||''}</span></td>
+    <td style="color:${c};font-weight:700">S/${sal.toFixed(2)}</td>
+    <td style="color:var(--warn)">S/${Number(s.consumido).toFixed(2)}</td></tr>`;
+  }).join('');
+}
+
+function loadCSV(inp){
+  const f=inp.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=ev=>parseCSV(ev.target.result);rd.readAsText(f,'UTF-8');inp.value='';
+}
+function parseCSV(txt){
+  txt=txt.replace(/^\uFEFF/,'');
+  const lines=txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  let in1=false;const out=[];
+  for(const l of lines){
+    if(l.startsWith('Nombre,')){in1=true;continue;}
+    if(l.startsWith('MOVIMIENTOS')||l.startsWith('Hora,'))break;
+    if(!in1)continue;
+    const c=l.split(',');if(c.length<4)continue;
+    out.push({nombre:c[0].trim(),placa:c[1]?.trim()||'',area:c[2]?.trim()||'',
+      saldoInicial:parseFloat(c[3])||0,saldoActual:parseFloat(c[4])||0,consumido:parseFloat(c[5])||0});
+  }
+  if(out.length){
+    saldos=out;save();fillSelects();renderSaldos();
+    document.getElementById('csvMsg').textContent='✅ '+out.length+' clientes cargados';
+    toast('✅ '+out.length+' clientes');
+  }else{toast('⚠️ No se leyeron datos del CSV',1);}
+}
+function defaultSaldos(){
+  parseCSV(`x\n\nNombre,Placa,Área,Saldo Inicial,Saldo Actual,Consumido
+Lau Vidal,,Cliente Crédito,2859.82,2657.77,202.05
+Transportes J,,Cliente Adelanto,3600.26,3600.26,0
+CYMI MASA GALONERA,,Cliente Adelanto,414.49,414.49,0
+CYMI MASA UNIDAD BKC-739,,Cliente Adelanto,765.15,765.15,0
+Ministerio Público Premium,,Cliente Crédito,16265.62,16071.48,194.14
+Ministerio Público Diesel,,Cliente Crédito,43007.57,43007.57,0
+INVERSIONES MOY,,Cliente Crédito,1469.08,1169,300.08\nMOVIMIENTOS`);
+}
+
+function fillSelects(){
+  ['mCli','cCli'].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;
+    const cur=s.value;
+    s.innerHTML='<option value="">— Seleccionar —</option>';
+    saldos.forEach(x=>{const o=document.createElement('option');o.value=o.textContent=x.nombre;s.appendChild(o);});
+    if(cur)s.value=cur;
+  });
+}
+function showSaldo(selId,barId,valId){
+  const v=document.getElementById(selId)?.value;
+  const bar=document.getElementById(barId),el=document.getElementById(valId);
+  const s=saldos.find(x=>x.nombre===v);
+  if(s&&bar&&el){bar.style.display='block';el.textContent='S/ '+Number(s.saldoActual).toFixed(2);}
+  else if(bar)bar.style.display='none';
+}
+function up(el){const p=el.selectionStart;el.value=el.value.toUpperCase();try{el.setSelectionRange(p,p);}catch(e){}}
+function updCnt(){document.getElementById('cnt').textContent=registros.length+' reg.';}
+function goTabId(id){const t=document.querySelector('[data-tab="'+id+'"]');if(t)goTab(t);}
+function save(){try{sessionStorage.setItem('vr',JSON.stringify(registros));sessionStorage.setItem('vs',JSON.stringify(saldos));}catch(e){}}
+
+let tT;
+function toast(msg,err=0){
+  const el=document.getElementById('toast');el.textContent=msg;el.className=err?'err':'';
+  el.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('on'),2800);
+}
+</script>
+</body>
+</html>
